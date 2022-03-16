@@ -9,6 +9,11 @@ WTN(WebRTC Transmission Network) Demos
 
 
 
+
+
+
+
+
 ## WTN(WebRTC Transmission Network)
 
 
@@ -25,13 +30,13 @@ Push URL
 `https://signaling.rtc.qcloud.com/v1/push/streamid?sdkappid=xxx&userid=xxx&usersig=xxxx`
 
 
-|  Params      | Description |    Required       |
-| ----------------- | ----------- |  -------------- |
-| sdkappid      |   current sdkappid  |    YES    |
-| userid      |   current userid  |    YES    |
-| usersig      |   current usersig  |    YES    |
-| streamid      |   streamid  |    YES    |
-| prefervcodec      |   h264 or vp8, h264 default  |    NO   |
+|  Params           |     Description      |    Required       |
+| ----------------- | -------------------- |  --------------   |
+| sdkappid          |   current sdkappid   |    YES            |
+| userid            |   current userid     |    YES            |
+| usersig           |   current usersig    |    YES            |
+| streamid          |   streamid           |    YES            |
+| prefervcodec      |   'h264' or 'vp8', h264 default  |    NO   |
 
 
 Method: `POST`
@@ -50,9 +55,7 @@ Resonse Code:
 
 Response Header:
 
-`Location: https://signaling.rtc.qcloud.com/v1/push/streamid?sdkappid=xxx&userid=xxxx&usersig=xxxxx&relay=xxxxx`
-
-== Location is the url used to stop the stream ==
+`Location: https://signaling.rtc.qcloud.com/v1/push/streamid?sdkappid=xxx&userid=xxxx&usersig=xxxxx&relay=xxxxx`   == Location is the url used to stop the stream ==
 
 Response Body: `SDP`
 

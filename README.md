@@ -9,8 +9,7 @@ WTN(WebRTC Transmission Network) Demos
 
 
 
-
-
+- - -
 
 
 
@@ -55,7 +54,9 @@ Resonse Code:
 
 Response Header:
 
-`Location: https://signaling.rtc.qcloud.com/v1/push/streamid?sdkappid=xxx&userid=xxxx&usersig=xxxxx&relay=xxxxx`   == Location is the url used to stop the stream ==
+`Location: https://signaling.rtc.qcloud.com/v1/push/streamid?sdkappid=xxx&userid=xxxx&usersig=xxxxx&relay=xxxxx`  
+
+***Location is the url used to stop the stream***
 
 Response Body: `SDP`
 

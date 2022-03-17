@@ -109,7 +109,9 @@ Push URL
 | streamid          |   streamid           |    YES            |
 
 Method: `POST`
+
 Body: `SDP`
+
 Content-Type: `application/sdp`
 
 Resonse Code:

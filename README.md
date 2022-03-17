@@ -63,3 +63,95 @@ Response Body: `SDP`
 
 
 
+### Stop push stream 
+
+Stop URL
+
+`https://signaling.rtc.qcloud.com/v1/push/streamid?sdkappid=xxx&userid=xxx&usersig=xxxx?relay=xxxx`
+
+
+|  Params           |     Description      |    Required       |
+| ----------------- | -------------------- |  --------------   |
+| sdkappid          |   current sdkappid   |    YES            |
+| userid            |   current userid     |    YES            |
+| usersig           |   current usersig    |    YES            |
+| streamid          |   streamid           |    YES            |
+| relay             |   relay id           |    YES            |
+
+
+Method: `DELETE`
+
+Resonse Code:
+
+```
+200/201: OK
+400: Bad Request
+403: Unauthorized
+404: Not Found
+```
+
+
+
+### Play stream 
+
+Push URL
+
+`https://signaling.rtc.qcloud.com/v1/play/streamid?sdkappid=xxx&userid=xxx&usersig=xxxx`
+
+
+|  Params           |     Description      |    Required       |
+| ----------------- | -------------------- |  --------------   |
+| sdkappid          |   current sdkappid   |    YES            |
+| userid            |   current userid     |    YES            |
+| usersig           |   current usersig    |    YES            |
+| streamid          |   streamid           |    YES            |
+
+Method: `POST`
+Body: `SDP`
+Content-Type: `application/sdp`
+
+Resonse Code:
+
+```
+200/201: OK
+400: Bad Request
+403: Unauthorized
+404: Not Found
+```
+
+Response Header:
+
+`Location: https://signaling.rtc.qcloud.com/v1/play/streamid?sdkappid=xxx&userid=xxxx&usersig=xxxxx&relay=xxxxx`  
+
+***Location is the url used to stop the stream***
+
+Response Body: `SDP`
+
+
+### Stop Play stream 
+
+Stop URL
+
+`https://signaling.rtc.qcloud.com/v1/play/streamid?sdkappid=xxx&userid=xxx&usersig=xxxx?relay=xxxx`
+
+
+|  Params           |     Description      |    Required       |
+| ----------------- | -------------------- |  --------------   |
+| sdkappid          |   current sdkappid   |    YES            |
+| userid            |   current userid     |    YES            |
+| usersig           |   current usersig    |    YES            |
+| streamid          |   streamid           |    YES            |
+| relay             |   relay id           |    YES            |
+
+
+Method: `DELETE`
+
+Resonse Code:
+
+```
+200/201: OK
+400: Bad Request
+403: Unauthorized
+404: Not Found
+```
+

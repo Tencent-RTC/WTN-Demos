@@ -21,6 +21,8 @@ WTN(WebRTC Transmission Network) is based on Tencent's RTC(TRTC), providing a hi
 It provides a simple http signaling api based on `WHIP`,  and extend `WHIP` to support WebRTC playback.
 
 
+[WHIP ietf](https://datatracker.ietf.org/doc/html/draft-ietf-wish-whip-02)
+
 
 ### Push stream 
 

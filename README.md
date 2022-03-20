@@ -14,7 +14,7 @@ WTN(WebRTC Transmission Network) Demos
 
 2, Change your own `sdkappid` and `secret` in `server/config.ts`.
 
-*** note that WTN is not for public for now, you should contact me to add your sdkappid to white list  ***
+***Note that WTN is not for public for now, you should contact me to add your sdkappid to white list***
 
 3, Run the server.
 

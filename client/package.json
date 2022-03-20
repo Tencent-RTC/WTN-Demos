@@ -5,12 +5,12 @@
   "files": [
     "dist"
   ],
-  "main": "./dist/one2one.umd.js",
-  "module": "./dist/one2one.es.js",
+  "main": "./dist/wtnclient.umd.js",
+  "module": "./dist/wtnclient.es.js",
   "exports": {
     ".": {
-      "import": "./dist/one2one.es.js",
-      "require": "./dist/one2one.umd.js"
+      "import": "./dist/wtnclient.es.js",
+      "require": "./dist/wtnclient.umd.js"
     }
   },
   "scripts": {
@@ -22,6 +22,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/cors": "^2.8.12",
+    "@types/express": "^4.17.13",
+    "@types/socket.io": "^3.0.2",
+    "events": "^3.3.0",
+    "express": "^4.17.3",
+    "socket.io": "^4.4.1",
     "socket.io-client": "^4.4.1"
   },
   "devDependencies": {

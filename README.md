@@ -6,11 +6,29 @@ WTN(WebRTC Transmission Network) Demos
 
 
 
+## HOW TO USE
 
 
 
-- - -
+1, Create your own TRTC app in Tencent Cloud.
 
+2, Change your own `sdkappid` and `secret` in `server/config.ts`.
+
+*** note that WTN is not for public for now, you should contact me to add your sdkappid to white list  ***
+
+3, Run the server.
+
+```bash
+cd server/ && npm install 
+npx ts-node server.ts
+```
+
+4, Run the client.
+
+```bash
+cd client/ && npm install
+npm run dev
+```
 
 
 ## WTN(WebRTC Transmission Network)

@@ -1,0 +1,169 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>
+<title> WTN demos  </title>
+    <style type="text/css">
+        .room {
+            cursor: pointer;
+        }
+        div.select {
+        display: inline-block;
+        margin: 0 0 1em 0;
+        }
+    </style>
+
+    <script type='module'>
+    
+        import { WTNClient,LocalStream,RemoteStream } from './src/index';
+
+        let localVideo = null;
+        let remoteContainer = null;
+        let wtnclient = null;
+        let localStream = null;
+        let connected = false;
+
+        let room = '';
+        let user = Math.random().toString(36).substring(7);
+        let stream = Math.random().toString(36).substring(7);
+
+
+        async function init() {
+            
+            localVideo = document.getElementById('local_video');
+            remoteContainer = document.getElementById('remote_container');
+
+            wtnclient = new WTNClient({
+                url:'http://localhost:8000/',
+            });
+
+            wtnclient.on('connect',()=>{
+                console.log('connected');
+                connected = true;
+            });
+
+            wtnclient.on('disconnect',()=>{
+                console.log('disconnected');
+                connected = false;
+            });
+
+            wtnclient.on('user-joined',(user)=>{
+                console.log('user joined',user);
+            });
+            
+            wtnclient.on('user-left',(user)=>{
+                console.log('user left',user);
+
+                let element = document.getElementById('remote_' + user.user);
+                if (element) {
+                    remoteContainer.removeChild(element);
+                }
+            });
+
+            localStream = wtnclient.createLocalSteam(stream);
+            
+            await localStream.init(true,true); // video, audio
+            await localStream.play(localVideo);
+        }
+
+        async function join() {
+            room = document.querySelector('#roomid-input').value;
+            if (room) {
+                document.querySelector('#roomid-place').innerText = 'roomid:' + room;
+            } else {
+                alert('Please enter roomid');
+                return;
+            }
+
+            if (!connected) {
+                alert('wtn client did not connect to the server');
+                return;
+            }
+
+            wtnclient.on('stream-published', async (remotestream)=>{
+                console.log('stream-published',remotestream);
+
+        
+                let ret = await wtnclient.subscribe(remotestream);
+                let remoteVideo = document.createElement('video');
+                remoteVideo.setAttribute('playsinline', true);
+                remoteVideo.setAttribute('autoplay', true);
+                remoteVideo.height = '240';
+                remoteVideo.width = '320';
+
+                remoteVideo.id = 'remote_' + remotestream.user;
+
+                await remotestream.play(remoteVideo);
+                remoteContainer.appendChild(remoteVideo);
+
+
+            });
+
+            wtnclient.on('stream-unpublished', async (remotestream)=>{
+                console.log('stream-unpublished',remotestream);
+
+                let ret = await wtnclient.unsubscribe(remotestream);
+
+                let element = document.getElementById('remote_' + remotestream.user);
+                if (element) {
+                    remoteContainer.removeChild(element);
+                }
+            });
+
+           let ret = await wtnclient.join(room,user,stream);
+           
+           ret = await wtnclient.publish(localStream);
+           
+           console.log('publish ret',ret);
+         
+        }
+
+        // async function publish() {
+
+        //     let ret = await wtnclient.publish(localStream);
+        //     console.log('publish ret',ret);
+        // }
+
+        async function leave() {
+
+        }
+
+
+        window.init = init;
+        window.join = join;
+        window.leave = leave;
+    </script>
+</head>
+<body onload="init();">
+	<h1>WTN Demo</h1>
+	<div id="roomsSelect">
+	</div>
+
+    <p id="roomid-place"></p>
+
+	<br/>
+
+	<div id="conference">
+        <form>
+            <label for="roomid-input">roomid</label>
+            <input type="text" id="roomid-input" value="123456"/>
+        </form>
+        <button onclick="join();">Join</button>
+        <!-- <button onclick="publish();">Publish</button> -->
+        <button onclick="leave();">Leave</button>
+
+		<div>
+			Local video<br />
+			<div style="width: 320px; height: 240px; border: 1px solid black;">
+				<video id="local_video" width="320" height="240" playsinline autoplay>
+				</video>
+			</div>
+
+			<span id="state_span">  </span>
+		</div>
+		Remote videos:
+		<br />
+		<div id="remote_container"></div>
+	</div>
+</body>
+</html>

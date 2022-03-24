@@ -68,7 +68,7 @@ class _WTNSampleState extends State<WTNSample> {
   // Platform messages are asynchronous, so we initialize in an async method.
   void _connect() async {
     final url = _serverController.text;
-    final room = _serverController.text;
+    final room = _roomController.text;
 
     if (url.isEmpty || room.isEmpty) {
       return;

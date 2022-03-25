@@ -23,21 +23,20 @@ class WTNSample extends StatefulWidget {
 
 class _WTNSampleState extends State<WTNSample> {
   LocalStream? _localStream;
-  final _localRenderer = RTCVideoRenderer();
-  String get stateStr => 'user: $user, stream: $streamId';
+  RTCVideoRenderer? _localRenderer;
+  final Map<String, RTCVideoRenderer> _remoteRenderers =
+      <String, RTCVideoRenderer>{};
   bool _connecting = false;
   late WTNClient _wtnClient;
   final user = randomAlpha(5).toLowerCase();
   final streamId = randomAlpha(5).toLowerCase();
-
-  TextEditingController _serverController = TextEditingController();
-  TextEditingController _roomController = TextEditingController();
+  final _serverController = TextEditingController();
+  final _roomController = TextEditingController();
   late SharedPreferences _preferences;
 
   @override
   void initState() {
     super.initState();
-    initRenderers();
     _loadSettings();
   }
 
@@ -53,16 +52,11 @@ class _WTNSampleState extends State<WTNSample> {
   @override
   void deactivate() {
     super.deactivate();
-    _localRenderer.dispose();
     _saveSettings();
   }
 
   void _saveSettings() {
     _preferences.setString('server', _serverController.text);
-  }
-
-  void initRenderers() async {
-    await _localRenderer.initialize();
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
@@ -76,21 +70,45 @@ class _WTNSampleState extends State<WTNSample> {
 
     _wtnClient = WTNClient(url);
 
+    _wtnClient.onStreamPublished.stream.listen((remoteStream) async {
+      remoteStream.onPlay.stream.listen((mediastream) async {
+        final renderer = RTCVideoRenderer();
+        await renderer.initialize();
+        setState(() {
+          _remoteRenderers[remoteStream.streamId] = renderer;
+          renderer.srcObject = mediastream;
+        });
+      });
+      await _wtnClient.subscribe(remoteStream);
+    });
+
+    _wtnClient.onStreamUnPublished.stream.listen((remoteStream) async {
+      setState(() {
+        final renderer = _remoteRenderers.remove(remoteStream.streamId);
+        if (renderer != null) {
+          renderer.srcObject = null;
+          renderer.dispose();
+        }
+      });
+      await _wtnClient.unsubscribe(remoteStream);
+    });
+
     _wtnClient.onConnected.stream.listen((event) async {
       await _wtnClient.join(room, user);
 
       try {
         _localStream = LocalStream(streamId);
         await _localStream!.init(audio: true, video: true);
-
+        _localRenderer = RTCVideoRenderer();
+        await _localRenderer?.initialize();
         setState(() {
-          _localRenderer.srcObject = _localStream!.mediaStream;
+          _localRenderer?.srcObject = _localStream!.mediaStream;
         });
 
         await _wtnClient.publish(_localStream!);
       } catch (e) {
         print('connect: error => ' + e.toString());
-        _localRenderer.srcObject = null;
+        _localRenderer?.srcObject = null;
         _localStream?.stop();
         return;
       }
@@ -105,11 +123,25 @@ class _WTNSampleState extends State<WTNSample> {
 
   void _disconnect() async {
     try {
-      _localStream?.stop();
-      _localRenderer.srcObject = null;
-      await _wtnClient.unpublish(_localStream!);
       setState(() {
         _connecting = false;
+
+        _localRenderer?.srcObject = null;
+        _localRenderer?.dispose();
+        _localRenderer = null;
+
+        _remoteRenderers.forEach((streamId, renderer) {
+          renderer.srcObject = null;
+          renderer.dispose();
+        });
+        _remoteRenderers.clear();
+      });
+      _localStream?.stop();
+      await _wtnClient.unpublish(_localStream!);
+      await _localStream!.stop();
+
+      _wtnClient.remoteStreams.forEach((streamId, remoteStream) async {
+        await _wtnClient.unsubscribe(remoteStream);
       });
     } catch (e) {
       print(e.toString());
@@ -126,6 +158,8 @@ class _WTNSampleState extends State<WTNSample> {
 
   @override
   Widget build(BuildContext context) {
+    final room = _roomController.text;
+    final stateStr = 'room: $room, user: $user, stream: $streamId';
     return MaterialApp(
         home: Scaffold(
       appBar: AppBar(title: Text('WTN Sample'), actions: <Widget>[
@@ -190,17 +224,53 @@ class _WTNSampleState extends State<WTNSample> {
                   ),
                 )
             ]),
-            if (_connecting)
+            if (_connecting && _localRenderer != null)
               Center(
                 child: Container(
                   margin: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
                   width: MediaQuery.of(context).size.width,
                   height: MediaQuery.of(context).size.height - 110,
-                  decoration: BoxDecoration(color: Colors.black54),
-                  child: RTCVideoView(_localRenderer,
-                      mirror: true,
-                      objectFit:
-                          RTCVideoViewObjectFit.RTCVideoViewObjectFitCover),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [Text('Local Video')],
+                      ),
+                      Row(
+                        children: [
+                          SizedBox(
+                              width: 160,
+                              height: 120,
+                              child:
+                                  RTCVideoView(_localRenderer!, mirror: true))
+                        ],
+                      ),
+                      Row(
+                        children: [Text('Remote Video')],
+                      ),
+                      Row(
+                        children: [
+                          ..._remoteRenderers.entries.map((entrie) {
+                            return (Container(
+                                width: 160,
+                                height: 140,
+                                decoration:
+                                    BoxDecoration(color: Colors.black12),
+                                child: Column(children: [
+                                  Row(
+                                    children: [Text('${entrie.key}')],
+                                  ),
+                                  Row(children: [
+                                    SizedBox(
+                                        width: 160,
+                                        height: 120,
+                                        child: RTCVideoView(entrie.value))
+                                  ])
+                                ])));
+                          }).toList(),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               )
           ]);

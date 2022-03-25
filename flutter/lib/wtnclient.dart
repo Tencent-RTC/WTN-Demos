@@ -38,8 +38,7 @@ class LocalStream {
     }
     whip ??= WHIP(url: pushUrl!);
 
-    await whip!.initlize(
-        mode: WhipMode.kSend, stream: mediaStream!, videoCodec: 'h264');
+    await whip!.initlize(mode: WhipMode.kSend, stream: mediaStream!);
     await whip!.connect();
   }
 
@@ -56,6 +55,7 @@ class LocalStream {
 
 class RemoteStream {
   MediaStream? mediaStream;
+  final StreamController<MediaStream?> onPlay = StreamController.broadcast();
   Map<String, dynamic> options;
   String? playUrl;
   late String streamId;
@@ -72,7 +72,10 @@ class RemoteStream {
     this.playUrl = playUrl;
     whip ??= WHIP(url: playUrl);
     whip?.onTrack = (RTCTrackEvent event) {
-      mediaStream = event.streams.first;
+      if (event.track.kind == 'video') {
+        mediaStream = event.streams.first;
+        onPlay.add(mediaStream);
+      }
     };
     await whip!.initlize(mode: WhipMode.kReceive);
     await whip!.connect();
@@ -80,12 +83,14 @@ class RemoteStream {
 
   Future<void> unsubscribe() async {
     whip?.close();
+    await stop();
   }
 
   Future<void> stop() async {
     mediaStream?.getTracks().forEach((track) async {
       await track.stop();
     });
+    mediaStream = null;
   }
 }
 
@@ -234,10 +239,12 @@ class WTNClient {
     final playUrl =
         '$WTNBaseURL/v1/play/${remoteStream.streamId}?sdkappid=$sdkappid&userid=$user&usersig=$localUserSig';
     print('playUrl $playUrl');
+    print("subscribe ${remoteStream.streamId}");
     await remoteStream.subscribe(playUrl);
   }
 
   Future<void> unsubscribe(RemoteStream remoteStream) async {
+    print("unsubscribe ${remoteStream.streamId}");
     await remoteStream.unsubscribe();
   }
 }

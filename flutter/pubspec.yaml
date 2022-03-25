@@ -15,13 +15,14 @@ dependencies:
      git:
          url: https://github.com/cloudwebrtc/flutter-whip.git
          ref: fix-charset-issue-for-tecent-wtn
+  random_string: ^2.3.1
   shared_preferences: ^2.0.5
   socket_io_client: ^2.0.0-beta.4-nullsafety.0
-  random_string: ^2.3.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  lints: ^1.0.1
 
 flutter:
   uses-material-design: true

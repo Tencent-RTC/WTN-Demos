@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:socket_io_client/socket_io_client.dart' as socket_io;
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:flutter_whip/flutter_whip.dart';
 
-final WTNBaseURL = "https://signaling.rtc.qcloud.com";
+const wtnBaseURL = "https://signaling.rtc.qcloud.com";
 
 class LocalStream {
   String streamId;
@@ -97,7 +97,7 @@ class RemoteStream {
 class WTNClient {
   String url;
   bool connected = false;
-  late IO.Socket socket;
+  late socket_io.Socket socket;
   String? localUserSig;
   String? room;
   String? user;
@@ -116,9 +116,9 @@ class WTNClient {
       StreamController.broadcast();
 
   WTNClient(this.url) {
-    socket = IO.io(
+    socket = socket_io.io(
         url,
-        IO.OptionBuilder()
+        socket_io.OptionBuilder()
             .setTransports(['websocket']) // for Flutter or Dart VM
             .enableAutoConnect() // disable auto-connection
             .setReconnectionDelay(1000)
@@ -173,7 +173,7 @@ class WTNClient {
   Future<dynamic> join(String room, String user) async {
     this.room = room;
     this.user = user;
-    Completer<dynamic> completer = Completer<dynamic>();
+    final Completer<dynamic> completer = Completer<dynamic>();
     socket.emitWithAck("join", {
       'room': room,
       'user': user,
@@ -197,18 +197,18 @@ class WTNClient {
 
   Future<dynamic> publish(LocalStream localStream) async {
     final pushUrl =
-        '$WTNBaseURL/v1/push/${localStream.streamId}?sdkappid=$sdkappid&userid=$user&usersig=$localUserSig';
+        '$wtnBaseURL/v1/push/${localStream.streamId}?sdkappid=$sdkappid&userid=$user&usersig=$localUserSig';
     print('pushUrl $pushUrl');
     await localStream.publish(pushUrl);
 
-    Completer<dynamic> completer = Completer<dynamic>();
+    final Completer<dynamic> completer = Completer<dynamic>();
     socket.emitWithAck("publish", {
       'room': room,
       'user': user,
       'stream': localStream.streamId,
     }, ack: (Map<String, dynamic> data) {
       if (data['code'] == 0) {
-        print("published ${data}");
+        print("published $data");
         completer.complete(data);
       } else {
         completer.completeError(data);
@@ -219,14 +219,14 @@ class WTNClient {
 
   Future<void> unpublish(LocalStream localStream) async {
     await localStream.unpublish();
-    Completer<dynamic> completer = Completer<dynamic>();
+    final Completer<dynamic> completer = Completer<dynamic>();
     socket.emitWithAck("unpublish", {
       'room': room,
       'user': user,
       'stream': localStream.streamId,
     }, ack: (Map<String, dynamic> data) {
       if (data['code'] == 0) {
-        print("unpublished ${data}");
+        print("unpublished $data");
         completer.complete(data);
       } else {
         completer.completeError(data);
@@ -237,7 +237,7 @@ class WTNClient {
 
   Future<void> subscribe(RemoteStream remoteStream) async {
     final playUrl =
-        '$WTNBaseURL/v1/play/${remoteStream.streamId}?sdkappid=$sdkappid&userid=$user&usersig=$localUserSig';
+        '$wtnBaseURL/v1/play/${remoteStream.streamId}?sdkappid=$sdkappid&userid=$user&usersig=$localUserSig';
     print('playUrl $playUrl');
     print("subscribe ${remoteStream.streamId}");
     await remoteStream.subscribe(playUrl);

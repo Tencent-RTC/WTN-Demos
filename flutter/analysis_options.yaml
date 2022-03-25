@@ -1,0 +1,20 @@
+include: package:lints/recommended.yaml
+
+linter:
+  rules:
+    - camel_case_types
+    - constant_identifier_names
+    - prefer_final_locals
+    - prefer_final_in_for_each
+    - sort_pub_dependencies
+
+analyzer:
+  errors:
+    todo: ignore
+    import_of_legacy_library_into_null_safe: ignore
+    avoid_function_literals_in_foreach_calls: ignore
+    avoid_print: ignore
+  exclude:
+    - lib/voip/webrtc/**
+    - lib/styles/famedly_icons_icons.dart
+    - test_driver/app_test.dart

@@ -11,17 +11,17 @@ void main() {
   if (!WebRTC.platformIsWeb) {
     WidgetsFlutterBinding.ensureInitialized();
   }
-  runApp(WTNSample());
+  runApp(MyApp());
 }
 
-class WTNSample extends StatefulWidget {
+class MyApp extends StatefulWidget {
   static String tag = 'whip_publish_sample';
 
   @override
-  _WTNSampleState createState() => _WTNSampleState();
+  _MyAppState createState() => _MyAppState();
 }
 
-class _WTNSampleState extends State<WTNSample> {
+class _MyAppState extends State<MyApp> {
   LocalStream? _localStream;
   RTCVideoRenderer? _localRenderer;
   final Map<String, RTCVideoRenderer> _remoteRenderers =
@@ -42,7 +42,7 @@ class _WTNSampleState extends State<WTNSample> {
 
   void _loadSettings() async {
     _preferences = await SharedPreferences.getInstance();
-    this.setState(() {
+    setState(() {
       _serverController.text =
           _preferences.getString('server') ?? 'http://localhost:8000/';
       _roomController.text = _preferences.getString('room') ?? '123456';
@@ -175,7 +175,7 @@ class _WTNSampleState extends State<WTNSample> {
             Column(children: <Widget>[
               FittedBox(
                 child: Text(
-                  '${stateStr}',
+                  stateStr,
                   textAlign: TextAlign.left,
                 ),
               ),
@@ -257,7 +257,7 @@ class _WTNSampleState extends State<WTNSample> {
                                     BoxDecoration(color: Colors.black12),
                                 child: Column(children: [
                                   Row(
-                                    children: [Text('${entrie.key}')],
+                                    children: [Text(entrie.key)],
                                   ),
                                   Row(children: [
                                     SizedBox(
